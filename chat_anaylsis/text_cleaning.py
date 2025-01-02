@@ -1,6 +1,10 @@
 import re
 import os
 
+'''
+텍스트 불용어 처리 클래스
+'''
+
 class TextCleaner :
     
     @staticmethod

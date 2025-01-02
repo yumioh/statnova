@@ -32,7 +32,7 @@ chat_nouns = pd.read_csv("./chat_anaylsis/data/chat_noun_tagging.csv")
 chat_nouns['noun_token'] = chat_nouns['noun_token'].apply(literal_eval)
 # print(chat_nouns['noun_token'].head())
 
-#불용어 처리
+#불용어 처리 : 추가할 불용어가 있다면 해당 txt파일에 단어를 추가하면 됨
 stopwords_file = "./chat_anaylsis/data/stopwords.txt"
 chat_nouns["content"] = chat_nouns['noun_token'].apply(lambda x: TextCleaner.process_text_with_stop_words(stopwords_file, x))
 
