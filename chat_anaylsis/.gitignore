@@ -1,0 +1,8 @@
+#ignore file
+*.csv
+*.txt
+*.xlsx
+*.xls
+*.env
+*.json
+*.png
