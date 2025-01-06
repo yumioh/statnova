@@ -97,7 +97,7 @@ print("---------------------LDA 학습------------------------")
 print("---------------------감정 분석 결과 원그래프------------------------")
 
 # 원 그래프 저장 위치
-pieGraph_path = f"./chat_anaylsis/img/pie_graph_sentiment.png"
+pieGraph_path = "./chat_anaylsis/img/pie_graph_sentiment.png"
 
 sentiment_chat = pd.read_csv("./chat_anaylsis/data/predicted_sentiment_chat.csv")
 print(sentiment_chat.head())
@@ -112,3 +112,183 @@ plt.axis('equal')
 plt.title('채팅 감정 비율', fontsize=20)
 plt.axis('equal')
 plt.savefig(pieGraph_path, dpi=300)
+
+print("---------------------요일별 입장하는 채팅 막대그래프------------------------")
+
+# join_df = pd.read_csv("./chat_anaylsis/data/join_messages.csv")
+# print(join_df.shape)
+
+# # print(join_df["date"].value_counts())
+
+# dayname_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+# dayname_counts = join_df["dayname"].value_counts().reindex(dayname_order)
+
+# plt.figure(figsize=(10, 6))
+# ax = dayname_counts.plot(kind='line', color='skyblue', label='Join Count', linewidth=2)
+
+# # 값 표시
+# for x, y in enumerate(dayname_counts):
+#     ax.text(x, y, str(y), fontsize=10, ha='center', va='bottom', color='black')
+
+# plt.title('Number of Joins Per Date', fontsize=14)
+# plt.xlabel('Date', fontsize=12)
+# plt.ylabel('Join Count', fontsize=12)
+# plt.tight_layout()
+# plt.savefig("./chat_anaylsis/img/line_graph_join_dayname.png", dpi=300)
+# plt.show()
+
+print("---------------------요일별 나가는 채팅 선그래프------------------------")
+
+# left_df = pd.read_csv("./chat_anaylsis/data/left_messages.csv")
+# print(left_df.shape)
+
+# # print(join_df["date"].value_counts())
+
+# dayname_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+# dayname_counts = left_df["dayname"].value_counts().reindex(dayname_order)
+
+# plt.figure(figsize=(10, 6))
+# ax = dayname_counts.plot(kind='line', color='red', label='Join Count', linewidth=2)
+
+# # 값 표시
+# for x, y in enumerate(dayname_counts):
+#     ax.text(x, y, str(y), fontsize=10, ha='center', va='bottom', color='black')
+
+# plt.title('Number of Left Per Date', fontsize=14)
+# plt.xlabel('Date', fontsize=12)
+# plt.ylabel('Left Count', fontsize=12)
+# plt.tight_layout()
+# plt.savefig("./chat_anaylsis/img/line_graph_left_dayname.png", dpi=300)
+# plt.show()
+
+print("---------------------시간별 입장하는 채팅 선그래프------------------------")
+join_df = pd.read_csv("./chat_anaylsis/data/join_messages.csv")
+
+# 시간대별 데이터 집계
+join_df['datetime'] = pd.to_datetime(join_df['date'] + ' ' + join_df['time'], format="%y-%m-%d %H:%M")
+join_df['hour'] = join_df['datetime'].dt.hour
+
+# 시간대별 데이터 집계
+join_by_hour = join_df['hour'].value_counts().sort_index().reset_index()
+join_by_hour.columns = ["hour", "count"]
+
+plt.figure(figsize=(10, 6))
+plt.plot(join_by_hour['hour'], join_by_hour['count'], marker='o', color='b', label='Join Count', linewidth=2)
+
+# 값 표시
+for x, y in zip(join_by_hour['hour'], join_by_hour['count']):
+    plt.text(x, y, str(y), fontsize=10, ha='center', va='bottom', color='black')
+
+# 그래프 설정
+plt.title('Joins by Hour', fontsize=14)
+plt.xlabel('Hour', fontsize=12)
+plt.ylabel('Join Count', fontsize=12)
+plt.xticks(range(24), labels=[f'{h}:00' for h in range(24)], rotation=45)
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.savefig("./chat_anaylsis/img/line_graph_join_hour.png", dpi=300)
+plt.tight_layout()
+
+plt.show()
+
+print("---------------------시간별 나가는 채팅 선그래프------------------------")
+left_df = pd.read_csv("./chat_anaylsis/data/left_messages.csv")
+
+# 시간대별 데이터 집계
+left_df['datetime'] = pd.to_datetime(left_df['date'] + ' ' + left_df['time'], format="%y-%m-%d %H:%M")
+left_df['hour'] = left_df['datetime'].dt.hour
+
+# 시간대별 데이터 집계
+left_by_hour = left_df['hour'].value_counts().sort_index().reset_index()
+left_by_hour.columns = ["hour", "count"]
+
+plt.figure(figsize=(10, 6))
+plt.plot(left_by_hour['hour'], left_by_hour['count'], marker='o', color='b', label='Join Count', linewidth=2)
+
+# 값 표시
+for x, y in zip(left_by_hour['hour'], left_by_hour['count']):
+    plt.text(x, y, str(y), fontsize=10, ha='center', va='bottom', color='black')
+
+# 그래프 설정
+plt.title('Lefts by Hour', fontsize=14)
+plt.xlabel('Hour', fontsize=12)
+plt.ylabel('Left Count', fontsize=12)
+plt.xticks(range(24), labels=[f'{h}:00' for h in range(24)], rotation=45)
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.savefig("./chat_anaylsis/img/line_graph_left_hour.png", dpi=300)
+plt.tight_layout()
+
+plt.show()
+
+print("---------------------입장하는 채팅 선그래프(년도별 및 달별)------------------------")
+# join_df = pd.read_csv("./chat_anaylsis/data/join_messages.csv")
+
+# # 날짜별로 데이터 집계
+# join_by_date = join_df["date"].value_counts().reset_index()
+# join_by_date.columns = ["date", "count"]
+
+# # 날짜 형식 변환
+# join_by_date['date'] = pd.to_datetime(join_by_date['date'], format="%y-%m-%d")
+
+# # 연도와 월 추가
+# join_by_date['year'] = join_by_date['date'].dt.year
+# join_by_date['month'] = join_by_date['date'].dt.month
+
+# monthly_data = join_by_date.groupby(['year', 'month'])['count'].sum().reset_index()
+
+# print(monthly_data)
+
+# # 연도별로 선 그래프 그리기
+# plt.figure(figsize=(10, 6))
+# for year in monthly_data['year'].unique():
+#     yearly_data = monthly_data[monthly_data['year'] == year]
+#     plt.plot(yearly_data['month'], yearly_data['count'], marker='o', label=f'{year}')
+
+# # 그래프 설정
+# plt.title('Monthly Joins by Year', fontsize=14)
+# plt.xlabel('Month', fontsize=12)
+# plt.ylabel('Join Count', fontsize=12)
+# plt.xticks(range(1, 13))
+# plt.legend(title='Year')
+# plt.grid(True, linestyle='--', alpha=0.7)
+# plt.savefig("./chat_anaylsis/img/line_graph_join_year_month.png", dpi=300)
+# plt.tight_layout()
+
+# # 그래프 출력
+# plt.show()
+
+
+print("--------------------나가는 채팅 선그래프(년도별 및 달별)------------------------")
+# left_df = pd.read_csv("./chat_anaylsis/data/left_messages.csv")
+
+# # 날짜별로 데이터 집계
+# left_by_date = left_df["date"].value_counts().reset_index()
+# left_by_date.columns = ["date", "count"]
+
+# # 날짜 형식 변환
+# left_by_date['date'] = pd.to_datetime(left_by_date['date'], format="%y-%m-%d")
+
+# # 연도와 월 추가
+# left_by_date['year'] = left_by_date['date'].dt.year
+# left_by_date['month'] = left_by_date['date'].dt.month
+
+# monthly_data = left_by_date.groupby(['year', 'month'])['count'].sum().reset_index()
+# #print(monthly_data)
+
+# # 연도별로 선 그래프 그리기
+# plt.figure(figsize=(10, 6))
+# for year in left_by_date['year'].unique():
+#     yearly_data = monthly_data[monthly_data['year'] == year]
+#     plt.plot(yearly_data['month'], yearly_data['count'], marker='o', label=f'{year}')
+
+# # 그래프 설정
+# plt.title('Monthly Lefts by Year', fontsize=14)
+# plt.xlabel('Month', fontsize=12)
+# plt.ylabel('Left Count', fontsize=12)
+# plt.xticks(range(1, 13))
+# plt.legend(title='Year')
+# plt.grid(True, linestyle='--', alpha=0.7)
+# plt.savefig("./chat_anaylsis/img/line_graph_left_year_month.png", dpi=300)
+# plt.tight_layout()
+
+# # 그래프 출력
+# plt.show()
