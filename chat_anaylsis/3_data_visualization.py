@@ -1,12 +1,14 @@
 import pandas as pd
 import os
 from ast import literal_eval
-from matplotlib import font_manager
+from dotenv import load_dotenv
+from matplotlib import font_manager, rc
 from data_visualizer import DataVisualizer
 from gensim.models import LdaMulticore, TfidfModel
 import pyLDAvis
 import pyLDAvis.gensim_models as gensimvis
 from gensim.corpora import Dictionary
+import matplotlib.pyplot as plt
 
 
 """
@@ -51,12 +53,12 @@ def lda_modeling_and_visualization(corpus, dictionary,start_date):
 
 print("---------------------워드 클라우드------------------------")
 
-#워드 클라우드 폰트 경로 설정
-font_directory = os.getenv("FONT_PATH")
-print(font_directory)
-font_file = "NanumBarunGothic.ttf"
-font_path = os.path.join(font_directory, font_file)
+# 한글 폰트 설정
+load_dotenv()
+path = os.getenv('font_path') 
+font_path = path + "NanumBarunGothic.ttf"
 font_name = font_manager.FontProperties(fname=font_path).get_name()
+rc('font', family=font_name)
 
 chat_df = pd.read_csv("./chat_anaylsis/data/chat_tokenized.csv")
 
@@ -68,26 +70,45 @@ print(chat_df.head())
 
 # 날짜별 키워드 검색
 start_date = '2021-01-01'
-end_date = '2024-01-02'
+end_date = '2024-12-31'
 filtered_data = filter_date(chat_df, start_date, end_date)
 print(filtered_data)
 
 filename = f"./chat_anaylsis/img/wordcloud_{start_date}.png"
-DataVisualizer.create_wordcloud2(filtered_data, font_path, filename)
+DataVisualizer.create_wordcloud(filtered_data, font_path, filename)
 
 print("---------------------LDA 학습------------------------")
-#multiprocessing을 사용하는 코드로 main을 넣어줘어야함
-if __name__ == '__main__':
-    #딕셔너리 생성 
-    dictionary = Dictionary(filtered_data['content'])
-    # 앞에서 10개의 항목을 출력
-    print("idword : ", list(dictionary.items())[:10])
+# #multiprocessing을 사용하는 코드로 main을 넣어줘어야함
+# if __name__ == '__main__':
+#     #딕셔너리 생성 
+#     dictionary = Dictionary(filtered_data['content'])
+#     # 앞에서 10개의 항목을 출력
+#     print("idword : ", list(dictionary.items())[:10])
 
-    #LDA 모델링을 위해 벡터화된 문서(코퍼스) 확인
-    corpus = [dictionary.doc2bow(tokens) for tokens in filtered_data['content']]
+#     #LDA 모델링을 위해 벡터화된 문서(코퍼스) 확인
+#     corpus = [dictionary.doc2bow(tokens) for tokens in filtered_data['content']]
 
-    #tfidf로 벡터화 적용
-    tfidf = TfidfModel(corpus)
-    corpus_TFIDF = tfidf[corpus]
+#     #tfidf로 벡터화 적용
+#     tfidf = TfidfModel(corpus)
+#     corpus_TFIDF = tfidf[corpus]
 
-    lda_modeling_and_visualization(corpus_TFIDF, dictionary, start_date)
+#     lda_modeling_and_visualization(corpus_TFIDF, dictionary, start_date)
+
+print("---------------------감정 분석 결과 원그래프------------------------")
+
+# 원 그래프 저장 위치
+pieGraph_path = f"./chat_anaylsis/img/pie_graph_sentiment.png"
+
+sentiment_chat = pd.read_csv("./chat_anaylsis/data/predicted_sentiment_chat.csv")
+print(sentiment_chat.head())
+
+sentiment_chat =  sentiment_chat[["content","predicted_emotion"]]
+print(sentiment_chat["predicted_emotion"].value_counts())
+
+colors= ['red','yellow','purple','goldenrod','blue','lightcoral']
+plt.figure(figsize=(8, 6))
+plt.pie(sentiment_chat["predicted_emotion"].value_counts(), labels=sentiment_chat["predicted_emotion"].value_counts().index, autopct='%1.1f%%', colors=colors, startangle=140)
+plt.axis('equal')
+plt.title('채팅 감정 비율', fontsize=20)
+plt.axis('equal')
+plt.savefig(pieGraph_path, dpi=300)

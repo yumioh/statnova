@@ -6,3 +6,5 @@
 *.env
 *.json
 *.png
+
+data/
