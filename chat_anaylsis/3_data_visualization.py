@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 
 - 채팅 내용 기반 워드클라우드
 - LDA 만들기
+- 감정 분석 결과 시각화
+- 날짜별, 요일별, 달별 채팅 입출 시각화
 
 """
 
