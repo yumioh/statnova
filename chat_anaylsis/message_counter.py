@@ -1,9 +1,8 @@
 import pandas as pd
-
 # Date format: yy-mm-dd
 # 월별, 날짜별, 시간대 별
 
-chat_df = pd.read_csv("./data/kakaochat_df_cleaning.csv")
+chat_df = pd.read_csv("./data/kakaochat_cleaning.csv")
 chat_df['date'] = pd.to_datetime(chat_df['date'], format='%y-%m-%d')
 
 yearly_messages = chat_df.groupby(chat_df['date'].dt.year).size().reset_index(name='message_count')
