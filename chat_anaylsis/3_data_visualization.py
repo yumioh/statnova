@@ -37,7 +37,7 @@ def filter_date(df, start_date, end_date):
 
 #LDA 모델링 및 파일 저장
 def lda_modeling_and_visualization(corpus, dictionary,start_date):
-    num_topics = 15  # 원하는 주제 수
+    num_topics = 7  # 원하는 주제 수
     lda_model = LdaMulticore(corpus, num_topics=num_topics, id2word=dictionary, passes=10, workers=6, random_state=42)
 
     # 각 주제별로 중요한 단어 확인
@@ -62,7 +62,7 @@ font_path = path + "NanumBarunGothic.ttf"
 font_name = font_manager.FontProperties(fname=font_path).get_name()
 rc('font', family=font_name)
 
-chat_df = pd.read_csv("./chat_anaylsis/data/chat_tokenized.csv")
+chat_df = pd.read_csv("./chat_anaylsis/data/chat_tokenized_강의.csv")
 
 # 빈리스트 삭제 (135964, 5)
 chat_df["content"] = chat_df["content"].apply(literal_eval)
@@ -76,8 +76,57 @@ end_date = '2024-12-31'
 filtered_data = filter_date(chat_df, start_date, end_date)
 print(filtered_data)
 
-filename = f"./chat_anaylsis/img/wordcloud_{start_date}.png"
+filename = f"./chat_anaylsis/img/wordcloud_{start_date}_강의.png"
 DataVisualizer.create_wordcloud(filtered_data, font_path, filename)
+
+print("---------------------키워드별 워드 클라우드------------------------")
+
+exclude_keywords = ["강의","과목","수업","시험","문제","과제","출석","혹시","학기","교수"]
+keyword = "교수"
+
+# 한글 폰트 설정
+load_dotenv()
+path = os.getenv('font_path') 
+font_path = path + "NanumBarunGothic.ttf"
+font_name = font_manager.FontProperties(fname=font_path).get_name()
+rc('font', family=font_name)
+
+chat_df = pd.read_csv(f"./chat_anaylsis/data/chat_tokenized_{keyword}.csv")
+
+# 빈리스트 삭제 (135964, 5)
+chat_df["content"] = chat_df["content"].apply(literal_eval)
+chat_df = chat_df[chat_df['content'].apply(len) > 0]
+print(chat_df.shape) 
+print(chat_df.head())
+
+# '강의' 키워드 제거
+filtered_data['content'] = filtered_data['content'].apply(lambda tokens: [token for token in tokens if token not in exclude_keywords])
+
+filename = f"./chat_anaylsis/img/wordcloud_{keyword}.png"
+DataVisualizer.create_wordcloud(filtered_data, font_path, filename)
+
+print("-------------------최빈어별 BAR 그래프------------------------")
+
+keywords = ["과목", "학기", "과제", "수업", "시험", "문제", "출석", "혹시", "통계", "강의", "교수"]
+counts = [9656, 6798, 5959, 5316, 5475, 4531, 3965, 3930, 5910, 3652, 3540]
+
+# 막대 그래프 생성
+plt.figure(figsize=(12, 6))
+plt.bar(keywords, counts, color='#00509E', edgecolor='black')
+
+#custom_colors = ['#4A90E2', '#00509E', '#00274D']
+# 그래프 설정
+plt.title('키워드 빈도', fontsize=18)
+plt.xlabel('Keywords', fontsize=12)
+plt.ylabel('Frequency', fontsize=12)
+plt.xticks(fontsize=15)
+plt.yticks(fontsize=15)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.savefig("./chat_anaylsis/img/Top_Keywords_bar.png", dpi=300)
+plt.tight_layout()
+
+# 그래프 출력
+plt.show()
 
 print("---------------------LDA 학습------------------------")
 # #multiprocessing을 사용하는 코드로 main을 넣어줘어야함
@@ -109,59 +158,80 @@ print(sentiment_chat["predicted_emotion"].value_counts())
 
 colors= ['red','yellow','purple','goldenrod','blue','lightcoral']
 plt.figure(figsize=(8, 6))
-plt.pie(sentiment_chat["predicted_emotion"].value_counts(), labels=sentiment_chat["predicted_emotion"].value_counts().index, autopct='%1.1f%%', colors=colors, startangle=140)
+plt.pie(sentiment_chat["predicted_emotion"].value_counts(), labels=sentiment_chat["predicted_emotion"].value_counts().index, autopct='%1.1f%%', colors=colors, startangle=140,textprops={'fontsize': 13})
 plt.axis('equal')
 plt.title('채팅 감정 비율', fontsize=20)
 plt.axis('equal')
 plt.savefig(pieGraph_path, dpi=300)
 
+print("---------------------감정 분석 결과 긍/부정------------------------")
+positive_emotions = ['행복']
+negative_emotions = ['공포', '분노', '슬픔', '혐오']
+
+sentiment_chat['emotion'] = sentiment_chat['predicted_emotion'].apply(
+    lambda x: '긍정' if x in positive_emotions else ('부정' if x in negative_emotions else '중립')
+)
+
+sentiment_chat_cnt = sentiment_chat["emotion"].value_counts()
+sentiment_chat_cnt = sentiment_chat_cnt[['긍정', '부정']]
+
+colors = ['#0079FF', '#FF204E']
+plt.figure(figsize=(8, 6))
+plt.pie(sentiment_chat_cnt, labels=sentiment_chat_cnt.index, autopct='%1.1f%%', colors=colors, startangle=140,textprops={'fontsize': 15})
+plt.axis('equal')
+plt.title('채팅 긍/부정 비율', fontsize=20)
+plt.savefig("./chat_anaylsis/img/pie_graph_sentiment_pn.png", dpi=300)
+#plt.show()
+
 print("---------------------요일별 입장하는 채팅 막대그래프------------------------")
 
-# join_df = pd.read_csv("./chat_anaylsis/data/join_messages.csv")
-# print(join_df.shape)
+join_df = pd.read_csv("./chat_anaylsis/data/join_messages.csv")
+print(join_df.shape)
 
-# # print(join_df["date"].value_counts())
+# print(join_df["date"].value_counts())
 
-# dayname_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-# dayname_counts = join_df["dayname"].value_counts().reindex(dayname_order)
+dayname_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+dayname_counts = join_df["dayname"].value_counts().reindex(dayname_order)
 
-# plt.figure(figsize=(10, 6))
-# ax = dayname_counts.plot(kind='line', color='skyblue', label='Join Count', linewidth=2)
+plt.figure(figsize=(10, 6))
+ax = dayname_counts.plot(kind='line', color='#00509E', label='Join Count', linewidth=2)
 
-# # 값 표시
-# for x, y in enumerate(dayname_counts):
-#     ax.text(x, y, str(y), fontsize=10, ha='center', va='bottom', color='black')
+# 값 표시
+for x, y in enumerate(dayname_counts):
+    ax.text(x, y, str(y), fontsize=10, ha='center', va='bottom', color='black')
 
-# plt.title('Number of Joins Per Date', fontsize=14)
-# plt.xlabel('Date', fontsize=12)
-# plt.ylabel('Join Count', fontsize=12)
-# plt.tight_layout()
-# plt.savefig("./chat_anaylsis/img/line_graph_join_dayname.png", dpi=300)
-# plt.show()
+plt.title('Number of Joins Per Date', fontsize=14)
+plt.xlabel('Date', fontsize=12)
+plt.ylabel('Join Count', fontsize=12)
+plt.tight_layout()
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.savefig("./chat_anaylsis/img/line_graph_join_dayname.png", dpi=300)
+plt.show()
 
 print("---------------------요일별 나가는 채팅 선그래프------------------------")
 
-# left_df = pd.read_csv("./chat_anaylsis/data/left_messages.csv")
-# print(left_df.shape)
+left_df = pd.read_csv("./chat_anaylsis/data/left_messages.csv")
+print(left_df.shape)
 
-# # print(join_df["date"].value_counts())
+# print(join_df["date"].value_counts())
 
-# dayname_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-# dayname_counts = left_df["dayname"].value_counts().reindex(dayname_order)
+dayname_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+dayname_counts = left_df["dayname"].value_counts().reindex(dayname_order)
 
-# plt.figure(figsize=(10, 6))
-# ax = dayname_counts.plot(kind='line', color='red', label='Join Count', linewidth=2)
+plt.figure(figsize=(10, 6))
+ax = dayname_counts.plot(kind='line', color='red', label='Join Count', linewidth=2)
 
-# # 값 표시
-# for x, y in enumerate(dayname_counts):
-#     ax.text(x, y, str(y), fontsize=10, ha='center', va='bottom', color='black')
+# 값 표시
+for x, y in enumerate(dayname_counts):
+    ax.text(x, y, str(y), fontsize=10, ha='center', va='bottom', color='black')
 
-# plt.title('Number of Left Per Date', fontsize=14)
-# plt.xlabel('Date', fontsize=12)
-# plt.ylabel('Left Count', fontsize=12)
-# plt.tight_layout()
-# plt.savefig("./chat_anaylsis/img/line_graph_left_dayname.png", dpi=300)
-# plt.show()
+plt.title('Number of Left Per Date', fontsize=14)
+plt.xlabel('Date', fontsize=12)
+plt.ylabel('Left Count', fontsize=12)
+plt.tight_layout()
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.savefig("./chat_anaylsis/img/line_graph_left_dayname.png", dpi=300)
+plt.show()
 
 print("---------------------시간별 입장하는 채팅 선그래프------------------------")
 join_df = pd.read_csv("./chat_anaylsis/data/join_messages.csv")
@@ -175,7 +245,7 @@ join_by_hour = join_df['hour'].value_counts().sort_index().reset_index()
 join_by_hour.columns = ["hour", "count"]
 
 plt.figure(figsize=(10, 6))
-plt.plot(join_by_hour['hour'], join_by_hour['count'], marker='o', color='b', label='Join Count', linewidth=2)
+plt.plot(join_by_hour['hour'], join_by_hour['count'], marker='o', color='#00509E', label='Join Count', linewidth=2)
 
 # 값 표시
 for x, y in zip(join_by_hour['hour'], join_by_hour['count']):
@@ -190,7 +260,7 @@ plt.grid(True, linestyle='--', alpha=0.7)
 plt.savefig("./chat_anaylsis/img/line_graph_join_hour.png", dpi=300)
 plt.tight_layout()
 
-plt.show()
+#plt.show()
 
 print("---------------------시간별 나가는 채팅 선그래프------------------------")
 left_df = pd.read_csv("./chat_anaylsis/data/left_messages.csv")
@@ -204,7 +274,7 @@ left_by_hour = left_df['hour'].value_counts().sort_index().reset_index()
 left_by_hour.columns = ["hour", "count"]
 
 plt.figure(figsize=(10, 6))
-plt.plot(left_by_hour['hour'], left_by_hour['count'], marker='o', color='b', label='Join Count', linewidth=2)
+plt.plot(left_by_hour['hour'], left_by_hour['count'], marker='o', color='#00509E', label='Join Count', linewidth=2)
 
 # 값 표시
 for x, y in zip(left_by_hour['hour'], left_by_hour['count']):
@@ -219,7 +289,7 @@ plt.grid(True, linestyle='--', alpha=0.7)
 plt.savefig("./chat_anaylsis/img/line_graph_left_hour.png", dpi=300)
 plt.tight_layout()
 
-plt.show()
+#plt.show()
 
 print("---------------------입장하는 채팅 선그래프(년도별 및 달별)------------------------")
 # join_df = pd.read_csv("./chat_anaylsis/data/join_messages.csv")

@@ -13,7 +13,7 @@ from text_cleaning import TextCleaner
 data = pd.read_csv('./chat_anaylsis/data/comment/korean_coverstaion_datasets.csv')
 
 # "놀람"을 제외한 데이터 필터링
-data = data[data['Emotion'] != '놀람']
+# data = data[data['Emotion'] != '놀람']
 
 data['Sentence'] = data['Sentence'].apply(TextCleaner.preprocess_text)
 comments = data['Sentence'].tolist()
@@ -21,7 +21,7 @@ labels = data['Emotion'].tolist()
 
 # 감정 레이블을 숫자로 
  
-label_map = {'공포': 0, '분노': 1, '슬픔': 2, '중립': 3, '행복': 4, '혐오': 5}
+label_map = {'공포': 0, '분노': 1, '슬픔': 2, '중립': 3, '행복': 4, '혐오': 5, '놀람' : 6}
 labels = [label_map[label] for label in labels]
 
 # 데이터 분할
