@@ -55,78 +55,71 @@ def filter_date(df, start_date, end_date):
 
 print("---------------------워드 클라우드------------------------")
 
-# 한글 폰트 설정
+# # 한글 폰트 설정
 load_dotenv()
 path = os.getenv('font_path') 
 font_path = path + "NanumBarunGothic.ttf"
 font_name = font_manager.FontProperties(fname=font_path).get_name()
 rc('font', family=font_name)
 
-chat_df = pd.read_csv("./chat_anaylsis/data/chat_tokenized_강의.csv")
+# chat_df = pd.read_csv("./chat_anaylsis/data/chat_tokenized_강의.csv")
 
-# 빈리스트 삭제 (135964, 5)
-chat_df["content"] = chat_df["content"].apply(literal_eval)
-chat_df = chat_df[chat_df['content'].apply(len) > 0]
-print(chat_df.shape) 
-print(chat_df.head())
+# # 빈리스트 삭제 (135964, 5)
+# chat_df["content"] = chat_df["content"].apply(literal_eval)
+# chat_df = chat_df[chat_df['content'].apply(len) > 0]
+# print(chat_df.shape) 
+# print(chat_df.head())
 
-# 날짜별 키워드 검색
-start_date = '2021-01-01'
-end_date = '2024-12-31'
-filtered_data = filter_date(chat_df, start_date, end_date)
-print(filtered_data)
+# # 날짜별 키워드 검색
+# start_date = '2021-01-01'
+# end_date = '2024-12-31'
+# filtered_data = filter_date(chat_df, start_date, end_date)
+# print(filtered_data)
 
-filename = f"./chat_anaylsis/img/wordcloud_{start_date}_강의.png"
-DataVisualizer.create_wordcloud(filtered_data, font_path, filename)
+# filename = f"./chat_anaylsis/img/wordcloud_{start_date}_강의.png"
+# DataVisualizer.create_wordcloud(filtered_data, font_path, filename)
 
 print("---------------------키워드별 워드 클라우드------------------------")
 
 exclude_keywords = ["강의","과목","수업","시험","문제","과제","출석","혹시","학기","교수","자료","캠퍼스","교재","공부","지역"]
-keyword = "교수"
-
-# 한글 폰트 설정
-load_dotenv()
-path = os.getenv('font_path') 
-font_path = path + "NanumBarunGothic.ttf"
-font_name = font_manager.FontProperties(fname=font_path).get_name()
-rc('font', family=font_name)
+keyword = "시험"
 
 chat_df = pd.read_csv(f"./chat_anaylsis/data/chat_tokenized_{keyword}.csv")
+print(chat_df)
 
-# 빈리스트 삭제 (135964, 5)
 chat_df["content"] = chat_df["content"].apply(literal_eval)
 chat_df = chat_df[chat_df['content'].apply(len) > 0]
 print(chat_df.shape) 
 print(chat_df.head())
 
-# '강의' 키워드 제거
-filtered_data['content'] = filtered_data['content'].apply(lambda tokens: [token for token in tokens if token not in exclude_keywords])
+#키워드 제거
+chat_df['content'] = chat_df['content'].apply(lambda tokens: [token for token in tokens if token not in exclude_keywords])
 
 filename = f"./chat_anaylsis/img/wordcloud_{keyword}.png"
-DataVisualizer.create_wordcloud(filtered_data, font_path, filename)
+DataVisualizer.create_wordcloud(chat_df, font_path, filename)
 
 print("-------------------최빈어별 BAR 그래프------------------------")
 
-keywords = ["과목", "학기", "과제", "수업", "시험", "문제", "출석", "혹시", "통계", "강의", "교수"]
-counts = [9656, 6798, 5959, 5316, 5475, 4531, 3965, 3930, 3300, 3652, 3540]
+# keywords = ["과목", "학기", "과제", "수업", "시험", "문제", "출석", "혹시", "통계", "강의", "교수"]
+# counts = [9656, 6798, 5959, 5316, 5475, 4531, 3965, 3930, 3300, 3652, 3540]
 
-# 막대 그래프 생성
-plt.figure(figsize=(12, 6))
-plt.bar(keywords, counts, color='#00509E', edgecolor='black')
+# # 막대 그래프 생성
+# plt.figure(figsize=(12, 6))
+# plt.bar(keywords, counts, color='#00509E', edgecolor='black')
 
-#custom_colors = ['#4A90E2', '#00509E', '#00274D']
-# 그래프 설정
-plt.title('키워드 빈도', fontsize=18)
-plt.xlabel('Keywords', fontsize=12)
-plt.ylabel('Frequency', fontsize=12)
-plt.xticks(fontsize=15)
-plt.yticks(fontsize=15)
-plt.grid(axis='y', linestyle='--', alpha=0.7)
-plt.savefig("./chat_anaylsis/img/Top_Keywords_bar.png", dpi=300)
-plt.tight_layout()
+# #custom_colors = ['#4A90E2', '#00509E', '#00274D']
+# # 그래프 설정
+# plt.title('키워드 빈도', fontsize=18)
+# plt.xlabel('Keywords', fontsize=12)
+# plt.ylabel('Frequency', fontsize=12)
+# plt.xticks(fontsize=15)
+# plt.yticks(fontsize=15)
+# plt.grid(axis='y', linestyle='--', alpha=0.7)
+# plt.savefig("./chat_anaylsis/img/Top_Keywords_bar.png", dpi=300)
+# plt.tight_layout()
 
-# 그래프 출력
-plt.show()
+# # 그래프 출력
+# plt.show()
 
 print("---------------------LDA 학습------------------------")
 #multiprocessing을 사용하는 코드로 main을 넣어줘어야함
@@ -158,14 +151,14 @@ print(sentiment_chat["predicted_emotion"].value_counts())
 
 colors= ['red','yellow','purple','goldenrod','blue','lightcoral']
 plt.figure(figsize=(8, 6))
-plt.pie(sentiment_chat["predicted_emotion"].value_counts(), labels=sentiment_chat["predicted_emotion"].value_counts().index, autopct='%1.1f%%', colors=colors, startangle=140,textprops={'fontsize': 13})
+plt.pie(sentiment_chat["predicted_emotion"].value_counts(), labels=sentiment_chat["predicted_emotion"].value_counts().index, autopct='%1.1f%%', colors=colors, startangle=140,textprops={'fontsize': 10})
 plt.axis('equal')
 plt.title('채팅 감정 비율', fontsize=20)
 plt.axis('equal')
 plt.savefig(pieGraph_path, dpi=300)
 
 print("---------------------감정 분석 결과 긍/부정------------------------")
-positive_emotions = ['행복']
+positive_emotions = ['행복','놀람']
 negative_emotions = ['공포', '분노', '슬픔', '혐오']
 
 sentiment_chat['emotion'] = sentiment_chat['predicted_emotion'].apply(

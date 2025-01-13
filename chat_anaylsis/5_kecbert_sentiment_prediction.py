@@ -73,7 +73,7 @@ def predict(dataset, model):
 predictions = predict(new_dataset, model)
 
 # 감정 레이블을 숫자로 변환
-label_map = {'공포': 0, '분노': 1, '슬픔': 2, '중립': 3, '행복': 4, '혐오': 5}
+label_map = {'공포': 0, '분노': 1, '슬픔': 2, '중립': 3, '행복': 4, '혐오': 5, '놀람': 6}
 
 # 예측된 감정을 레이블로 변환
 label_map_reverse = {v: k for k, v in label_map.items()}

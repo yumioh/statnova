@@ -9,8 +9,8 @@ from text_cleaning import TextCleaner
 1. KcBERT를 활용한 감성분석 : 학습된 모델을 사용하여 새로운 데이터의 감정을 예측(감성분석)
 """
 
-# 데이터 로드
-data = pd.read_csv('./chat_anaylsis/data/comment/korean_coverstaion_datasets.csv')
+# 데이터 로드 : 감정이 태깅된 자유대화 (성인)
+data = pd.read_excel('./chat_anaylsis/data/comment/korean_coverstaion_dataset.xlsx')
 
 # "놀람"을 제외한 데이터 필터링
 # data = data[data['Emotion'] != '놀람']

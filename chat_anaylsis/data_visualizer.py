@@ -52,6 +52,8 @@ class DataVisualizer :
 
         # 단어 빈도 계산
         word_freq = Counter(all_tokens)
+        
+        print(word_freq.most_common(40))
 
         # 워드 클라우드 생성
         wordcloud = WordCloud(

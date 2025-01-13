@@ -27,13 +27,13 @@ print("---------------------품사부착 및 파일 저장 (PoS Tagging)--------
 
 print("------------------------키워드별 품사 부착 및 파일 저장------------------------")
 
-keyword = "혹시"
+keyword = "파이썬"
 
-# keyword_df = pd.read_csv(f"./chat_anaylsis/data/{keyword}_export.csv")
-# print(f"{keyword} 개수 : ",keyword_df.shape)
-# keyword_df["keyword_noun"] = keyword_df["content"].apply(WordTagging.okt_noun_tagging_remove_one_char)
+keyword_df = pd.read_csv(f"./chat_anaylsis/data/{keyword}_export.csv")
+print(f"{keyword} 개수 : ",keyword_df.shape)
+keyword_df["keyword_noun"] = keyword_df["content"].apply(WordTagging.okt_noun_tagging_remove_one_char)
 
-# keyword_df[['date','time','dayname','nickname','content','keyword_noun']].to_csv(f"./chat_anaylsis/data/chat_{keyword}_noun_tagging.csv", index=False, encoding='utf-8-sig')
+keyword_df[['date','time','dayname','nickname','content','keyword_noun']].to_csv(f"./chat_anaylsis/data/chat_{keyword}_noun_tagging.csv", index=False, encoding='utf-8-sig')
 
 print("---------------------불용어 처리------------------------")
 
