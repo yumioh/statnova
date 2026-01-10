@@ -7,6 +7,9 @@
 *.json
 *.png
 
+# Ignore directories
+__pycache__/
 data/
+img/
 
 .idea/
