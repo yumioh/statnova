@@ -47,42 +47,49 @@ def change_time_prefix(input_str) :
         return "Unknown Date Format"
 
 # Get news links from Naver news based on keyword and date range
-def get_news_links(keyword, start_date, end_date):
-    # naver news url
-    target_url = f"https://search.naver.com/search.naver?where=news&query={keyword}&pd=3&ds={start_date}&de={end_date}"
-    driver.get(target_url)
-    # wait for page to load 2 seconds
-    driver.implicitly_wait(2)
+def get_news_links(keywords, start_date, end_date):
+    all_links = []
 
-    # 무한 스크롤 모든 뉴스 로드하기 => 네이버 뉴스 JavaScript 동적 로딩 대응을 하기 위함
-    # 네이버 뉴스 검색 결과 수에 상관없이 서버에 더 줄 데이터가 없으면 브라우저 전체 길이는 멈추게 되어 있음
-    last_height = driver.execute_script("return document.body.scrollHeight")
-    while True:
-        # 바닥까지 스크롤
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(1.5) # 새 기사가 로드될 때까지의 대기 시간
-        
-        # 스크롤 후 높이 확인
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        # 높이가 이전과 같다면(더 이상 로드될 데이터가 없다면) 중단
-        if new_height == last_height:
-            break
-        last_height = new_height
-        
-    # 모든 데이터가 로드된 후 BeautifulSoup 실행
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    date_range = pd.date_range(start_date, end_date)
+    print(f"총 {len(date_range)}일치 데이터 수집을 시작합니다.")
+    
+    for date in date_range:
+        str_date = date.strftime("%Y.%m.%d")
+        query_str = "+".join(keywords)
+        # naver news url    
+        target_url = f"https://search.naver.com/search.naver?where=news&query={query_str}&pd=3&ds={str_date}&de={str_date}"
+        #print(target_url)
+        driver.get(target_url)
+        driver.implicitly_wait(2) # wait for page to load 2 seconds
 
-    # 네이버 뉴스 링크 추출
-    naver_links = soup.select('a[href*="n.news.naver.com"]')
+        # 무한 스크롤 모든 뉴스 로드하기 => 네이버 뉴스 JavaScript 동적 로딩 대응을 하기 위함
+        # 네이버 뉴스 검색 결과 수에 상관없이 서버에 더 줄 데이터가 없으면 브라우저 전체 길이는 멈추게 되어 있음
+        last_height = driver.execute_script("return document.body.scrollHeight")
+        while True:
+            # 바닥까지 스크롤
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(1.2) # 새 기사가 로드될 때까지의 대기 시간
+            
+            # 스크롤 후 높이 확인
+            new_height = driver.execute_script("return document.body.scrollHeight")
+            # 높이가 이전과 같다면(더 이상 로드될 데이터가 없다면) 중단
+            if new_height == last_height:
+                break
+            last_height = new_height
+            
+        # 모든 데이터가 로드된 후 BeautifulSoup 실행
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        # 네이버 뉴스 링크 추출
+        naver_links = soup.select('a[href*="n.news.naver.com"]')
 
-    link_urls = []
-    for link in naver_links:
-        link_url = link['href']
-        if link_url not in link_urls: ## 중복 링크 제거
-            link_urls.append(link_url)
+        # 당일 수집된 링크 중 중복 제거 후 통합 리스트에 추가
+        # fromkeys : dict의 키로 리스트 요소를 사용하여 중복 제거
+        daily_links = list(dict.fromkeys([link['href'] for link in naver_links]))
+        all_links.extend(daily_links)
 
-    print(f"{start_date} : 총 {len(link_urls)}건 링크 수집 완료")
-    return link_urls
+        print(f"[{str_date}] : {len(daily_links)}건 완료 (누적: {len(all_links)}건)")
+        time.sleep(0.5)
+    return list(set(all_links))
 
 # 뉴스 제목, 본문, 날짜, 언론사 수집 
 def get_news_contents(news_url):
@@ -122,27 +129,38 @@ def get_news_contents(news_url):
 
 # Set date range and keyword for news search
 if __name__ == "__main__": # 해당 스크립트가 메인 안에 있는 함수만 실행되도록 함
-    start_date = "2026.01.01"
-    end_date = "2026.01.11"
-    keyword = "데이터사이언스"
+    start_date = "2020.01.01"
+    end_date = "2020.01.10"
+    keywords = ["AI", "통계"]
 
-    all_news_links = get_news_links(keyword, start_date, end_date)
-    print(f"[{start_date} ~ {end_date}] 총 {len(all_news_links)}건 링크 수집 완료")
+    try:
+        all_news_links = get_news_links(keywords, start_date, end_date)
+        print(f"[{start_date} ~ {end_date}] 총 {len(all_news_links)}건 링크 수집 완료")
 
-    news_data = []
-    for url in all_news_links:
-        news_content = get_news_contents(url)
-        if news_content:
-            news_data.append(news_content)
-        time.sleep(0.5) # 과도한 요청 방지용 미세 대기
+        news_data = []
+        for i, url in enumerate(all_news_links):
+            news_content = get_news_contents(url)
+            if news_content:
+                news_data.append(news_content)
 
-    # Save collected data to a DataFrame and CSV
-    if news_data :
-        df = pd.DataFrame(news_data)
-        filet_path = f"./stats_to_dataScience/data/naver_news_{keyword}_{start_date}_to_{end_date}.csv"
-        df.to_csv(filet_path, index=False, encoding='utf-8-sig')
-        print(f"뉴스 데이터 수집 완료! 총 {len(df)}건의 뉴스가 저장되었습니다.")
+            if (i + 1) % 10 == 0:
+                print(f">>> 현재 본문 수집 중... ({i + 1}/{len(all_news_links)})")
+            
+            time.sleep(0.5) # 과도한 요청 방지용 미세 대기
 
-driver.quit()
+        # Save collected data to a DataFrame and CSV
+        if news_data :
+            df = pd.DataFrame(news_data)
+            filet_path = f"./stats_to_dataScience/data/naver_news_{keywords}_{start_date}.csv"
+            df.to_csv(filet_path, index=False, encoding='utf-8-sig')
+            print(f"뉴스 데이터 수집 완료! 총 {len(df)}건의 뉴스가 저장되었습니다.")
+
+    except Exception as e:
+        print(f"프로그램 실행 중 오류 발생: {e}")
+
+    finally:
+        # 4. 종료 처리
+        driver.quit()
+        print("--- 브라우저 종료 및 프로그램 종료 ---")
 
 
