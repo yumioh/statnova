@@ -9,8 +9,7 @@ import pandas as pd
 from datetime import datetime
 
 '''
-셀레리움을 활용한 네이버 뉴스 크롤러
-- Selenium과 BeautifulSoup 활용
+셀레리움과 BeautifulSoup 활용한 네이버 뉴스 크롤러
 - 특정 날짜의 뉴스를 키워드로 검색하여 링크 수집
 - 해당하는 페이지에서 n.naver.com 도메인의 뉴스 링크만 추출 => 개별 언론사별 페이지에서 소스 구조가 다르기 때문에 일괄 크롤링이 어려움
 - 뉴스 본문에서 제목, 본문, 날짜, 언론사 정보 수집
