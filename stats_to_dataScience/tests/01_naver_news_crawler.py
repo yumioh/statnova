@@ -17,6 +17,7 @@ from dotenv import load_dotenv
  - selelium으로 활용한 개별 뉴스 크롤링
  '''
 
+# You need to create a .env file with CLIENT_ID and CLIENT_SECRET
 # Load environment variables from .env file
 load_dotenv()
 client_id = os.getenv("CLIENT_ID") 
