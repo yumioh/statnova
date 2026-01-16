@@ -129,9 +129,10 @@ def get_news_contents(news_url):
 
 # Set date range and keyword for news search
 if __name__ == "__main__": # 해당 스크립트가 메인 안에 있는 함수만 실행되도록 함
-    start_date = "2020.01.01"
-    end_date = "2020.01.10"
-    keywords = ["AI", "통계"]
+    start_date = "2024.01.01"
+    end_date = "2024.12.31"
+    keywords = ["데이터", "통계"]
+
 
     try:
         all_news_links = get_news_links(keywords, start_date, end_date)
@@ -150,8 +151,9 @@ if __name__ == "__main__": # 해당 스크립트가 메인 안에 있는 함수�
 
         # Save collected data to a DataFrame and CSV
         if news_data :
+            start_date = start_date.replace('.', '_')
             df = pd.DataFrame(news_data)
-            filet_path = f"./stats_to_dataScience/data/naver_news_{keywords}_{start_date}.csv"
+            filet_path = f"./stats_to_dataScience/data/raw_data/naver_news_{keywords}_{start_date}.csv"
             df.to_csv(filet_path, index=False, encoding='utf-8-sig')
             print(f"뉴스 데이터 수집 완료! 총 {len(df)}건의 뉴스가 저장되었습니다.")
 
