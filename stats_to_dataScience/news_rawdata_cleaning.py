@@ -1,25 +1,28 @@
 import pandas as pd
-from text_cleaning import TextCleaner
+import re, os
 
 '''
-1. data cleaning : 데이터의 불필요한 요소를 제거하거나 데이터를 분석 가능하게 만드는 초기 작업
-- 컬럼명 변경 및 추가 : column1 -> data, nickname(대화닉네임), content(대화내용용)
-- 닉네임과 채팅 내용 분리
-- NaN값 제거
-- 시간, 날짜 요일 분리 및 추출
+1. Raw data cleaning 
 - 특수문자 제거
+- 날짜순으로 정리 
+- 파일 병합
 '''
+
+def remove_special_characters(text):
+    # 정규식을 사용하여 알파벳, 숫자, 한글만 남기고 나머지 제거
+    cleaned_text = re.sub(r"[^a-zA-Z0-9가-힣\s]", "", text)
+    return cleaned_text
 
 # 수집한 데이터 병합
 # 1. 경로 및 설정
 input_dir = "./stats_to_dataScience/data/raw_data"  # CSV 파일들이 있는 폴더
 keywords = ['데이터','통계']
-output_path = f"./stats_to_dataScience/data/merged_news_{keywords}.csv" # 결과 파일 경로
+output_path = f"./stats_to_dataScience/data/merged_news_{keywords}_2025.csv" # 결과 파일 경로
 target_columns = ['date', 'title', 'content', 'url'] # 고정할 컬럼 순서
 
-# merged_df = pd.DataFrame()
+merged_df = pd.DataFrame()
 
-# # 2. 파일 목록 순회 및 필터링
+# 2. 파일 목록 순회 및 필터링
 # if os.path.exists(input_dir):
 #     files = [f for f in os.listdir(input_dir) if f.endswith('.csv')]
 #     print(files)
@@ -57,14 +60,11 @@ target_columns = ['date', 'title', 'content', 'url'] # 고정할 컬럼 순서
 # else:
 #     print(f"경로를 찾을 수 없습니다: {input_dir}")
 
-
 # 뉴스 데이터 불려오기
-# AI, 통계 : 26207건
-# 데이터, 통계 : 77512건
-news_txt = pd.read_csv(f'./stats_to_dataScience/data/merged_news_{keywords}.csv')
-#(210837, 3)
+# 데이터, 통계 : 86697건
+news_txt = pd.read_csv(f'./stats_to_dataScience/data/merged_news_{keywords}_2025.csv')
 print("raw data : ", news_txt.shape)
-# print("raw data : ",chat_txt[:20])
+# # print("raw data : ",chat_txt[:20])
 
 # nan값 없음
 news_txt = news_txt[['date', 'title', 'content', 'url']].dropna()
@@ -75,8 +75,8 @@ news_txt = news_txt.sort_values(by='date', ascending=True)
 # print(news_txt['date'].head())
 
 #특수문자 제거
-news_txt["content"] = news_txt["content"].apply(TextCleaner.remove_special_characters)
+news_txt["content"] = news_txt["content"].apply(remove_special_characters)
 
 print(news_txt[:10])
 print(news_txt.info())
-news_txt[['date', 'title', 'content']].to_csv(f'./stats_to_dataScience/data/news_cleaning_{keywords}.csv',index=False)
+news_txt[['date', 'title', 'content']].to_csv(f'./stats_to_dataScience/data/news_cleaning_{keywords}_2025.csv',index=False)

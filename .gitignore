@@ -6,10 +6,13 @@
 *.env
 *.json
 *.png
+*.zip
+*.tar
 
 # Ignore directories
 __pycache__/
 data/
 img/
+edu_analysis/data/
 
 .idea/

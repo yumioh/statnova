@@ -129,8 +129,8 @@ def get_news_contents(news_url):
 
 # Set date range and keyword for news search
 if __name__ == "__main__": # 해당 스크립트가 메인 안에 있는 함수만 실행되도록 함
-    start_date = "2024.01.01"
-    end_date = "2024.12.31"
+    start_date = "2025.01.01"
+    end_date = "2025.09.30"
     keywords = ["데이터", "통계"]
 
 

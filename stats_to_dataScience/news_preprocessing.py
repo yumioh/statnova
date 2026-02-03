@@ -1,10 +1,11 @@
 import pandas as pd
 from ast import literal_eval
 from collections import Counter
+from word_tagging import WordTagging
 import re
 
 '''
-2. 데이터 전처리 : 키워드 태깅 및 불용어 처리
+2. 데이터 전처리 : 키워드 태깅 및 불용어 
 - 명사로 분리
 - 불용어 처리
 - 특수문자제거
@@ -16,29 +17,32 @@ def load_stop_words(stopwords_file):
          stop_words = [line.strip() for line in file.readlines()]
     return stop_words
 
-keywords = ['데이터', '통계']
-text_df = pd.read_csv(f"./stats_to_dataScience/data/news_cleaning_{keywords}.csv")
-print(text_df.head())
-print(text_df.shape) 
-print("---------------------품사부착 및 파일 저장 (PoS Tagging)------------------------")
+# 89626건
+keywords = ['데이터','통계']
+# text_df = pd.read_csv(f"./stats_to_dataScience/data/news_cleaning_{keywords}.csv")
+# print(text_df.head())
+# print(text_df.shape) 
+
+# print("---------------------품사부착 및 파일 저장 (PoS Tagging)------------------------")
 
 # #명사 추출 (단, 1글자는 제외)
 # text_df["noun_token"] = text_df["content"].apply(WordTagging.okt_noun_tagging_remove_one_char)
 # print(text_df.head())
 
-# text_df[['date', 'title', 'content','noun_token']].to_csv(f"./stats_to_dataScience/data/news_noun_tagging_{keywords}.csv", index=False, encoding='utf-8-sig')
+# text_df[['date', 'content','noun_token']].to_csv(f"./stats_to_dataScience/data/news_noun_tagging_{keywords}.csv", index=False, encoding='utf-8-sig')
 
 
-print("---------------------불용어 처리 시작------------------------")
+# print("---------------------불용어 처리 시작------------------------")
 # 1. 파일 읽기
-news_text_nouns = pd.read_csv(f"./stats_to_dataScience/data/news_noun_tagging_{keywords}.csv")
+news_text_nouns = pd.read_csv(f"./stats_to_dataScience/data/news_noun_tagging_{keywords}_2017_2025.csv")
+print(news_text_nouns.info())
 
 # 2. 먼저 리스트 객체로 변환 
 # NaN 값이 있을 수 있으므로 fillna 후 변환
 news_text_nouns['noun_token'] = news_text_nouns['noun_token'].fillna('[]').apply(literal_eval)
 
 # 3. 불용어 사전 미리 로드 (딱 한 번만 실행)
-stopwords_file = "./stats_to_dataScience/data/stopwords.txt"
+stopwords_file = "./stats_to_dataScience/data/stopwords_with_corona.txt"
 stop_words = load_stop_words(stopwords_file)
 
 # 4. 통합 전처리 함수 (특수문자 제거 + 불용어 처리)
@@ -53,8 +57,9 @@ def final_cleaning(tokens):
 
 # 5. 전처리 적용
 news_text_nouns["noun_contents"] = news_text_nouns['noun_token'].apply(final_cleaning)
+print(news_text_nouns.info())
 
-# 6. 최빈어 조회 (메모리 아끼는 Counter 사용)
+# 6. 최빈어 조회
 word_counts = Counter()
 for tokens in news_text_nouns['noun_contents']:
     word_counts.update(tokens)
@@ -63,6 +68,6 @@ most_common_words = word_counts.most_common(40)
 print("최종 최빈어 조회 : ", most_common_words)
 
 # 7. 저장
+# pickle은 파이썬 객체 자체를 이진(Binary) 형태로 직렬화하여 저장. 즉, 리스트는 리스트 그대로, 데이터 타입은 데이터 타입 그대로 복원하기 위함
 print(news_text_nouns.info())
-news_text_nouns[['date', 'title', 'noun_contents']].to_pickle(f"./stats_to_dataScience/data/news_tokenized_{keywords}.pkl")
-#news_text_nouns[['date', 'title', 'noun_contents']].to_csv(f"./stats_to_dataScience/data/news_tokenized_{keywords}.csv",index=False, encoding='utf-8-sig')
+news_text_nouns[['date', 'noun_contents']].to_pickle(f"./stats_to_dataScience/data/news_tokenized_{keywords}_2025.pkl")
